@@ -342,16 +342,18 @@ function getRulesFromUI() {
   });
   return rules;
 }
-
-function updateGenerateButton(uploadedCvs) {
+// const hasCvs = uploadedCvs.length > 0;
+// generateBtn.disabled = !hasFiles && !hasCvs;
+//replaced the above lines with the below function for CV Selection
+// Start
+function updateGenerateButton(cvs = []) {
   const generateBtn = document.getElementById("generate-recommendations-btn");
-  const fileInput = document.getElementById("file-input");
-  if (generateBtn) {
-    const hasFiles = fileInput && fileInput.files && fileInput.files.length > 0;
-    const hasCvs = uploadedCvs.length > 0;
-    generateBtn.disabled = !hasFiles && !hasCvs;
-  }
+  if (!generateBtn) return;
+
+  const hasSelected = cvs.some(cv => cv.selected !== false);
+  generateBtn.disabled = !hasSelected;
 }
+// END
 
 // ---------------------------------------------------------------------------
 // Candidate Card Creation (With Timeline)
@@ -923,12 +925,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       const rules = getRulesFromUI();
-      const cvArray = submittedCvData; 
+      // const cvArray = submittedCvData; replaced this line with the below line 
+      const cvArray = submittedCvData.filter(cv => cv.selected); 
       
       allRecommendationsMap = {}; 
       lastRecommendations = { candidates: [] };
       saveLastRecommendations(lastRecommendations);
-
+      // added below function for CV Selection //Start
+      if (cvArray.length === 0) {
+        setButtonLoading(generateBtn, false);
+        alert(currentLang === 'ar'
+          ? "يرجى اختيار سيرة ذاتية واحدة على الأقل"
+          : "Please select at least one CV");
+        return;
+      }
+      // End
       let completedCount = 0;
       for (const cv of cvArray) {
         const placeholder = document.createElement("div");
@@ -1005,6 +1016,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     allResults.forEach((cv, idx) => {
       const bubble = document.createElement("div");
       bubble.className = "cv-summary-bubble";
+      // Added for cv Selection (START)
+      const checkbox = document.createElement("input"); // Added for cv Selection
+      checkbox.type = "checkbox";
+      checkbox.className = "cv-select-checkbox";
+      checkbox.checked = cv.selected !== false;
+      
+      checkbox.addEventListener("change", (e) => {
+        cv.selected = e.target.checked;
+        updateGenerateButton(submittedCvData);
+      });
+      
+      bubble.appendChild(checkbox);
+    // Added for cv Selection (END)
       bubble.title = "Click to re-open CV review";
       const nameEl = document.createElement("span");
       nameEl.className = "bubble-name";
@@ -1043,7 +1067,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       bubble.appendChild(nameEl);
       bubble.appendChild(metaEl);
       bubble.appendChild(deleteBtn);
-      bubble.addEventListener("click", () => openCvModal(submittedCvData, idx));
+      // bubble.addEventListener("click", () => openCvModal(submittedCvData, idx)); replaced this with below for CV Selection
+      // Start
+      bubble.addEventListener("click", (e) => {
+        if (e.target.closest(".cv-select-checkbox")) return;
+        openCvModal(submittedCvData, idx);
+      });
+      // END
       container.appendChild(bubble);
     });
   };
@@ -1056,7 +1086,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         const extracted = await Promise.all(files.map(async (file) => {
             const rawText = await extractTextFromFile(file);
-            return { name: file.name, text: rawText, structured: null, isParsing: true };
+            return { name: file.name, text: rawText, structured: null, isParsing: true, selected: true  }; // ✅ ADD selected: true  to THIS
         }));
 
         upsertAndRenderSubmittedCvs(extracted);
@@ -1198,3 +1228,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 });
+
