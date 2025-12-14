@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillMatch Pro</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="ltr-layout">
+  <header class="site-header">
+    <div class="site-header-inner container" style="justify-content: space-between;">
+      
+      <div class="brand">
+        <i class="fas fa-user-graduate"></i>
+        <div>
+          <h1 data-i18n="appTitle">SkillMatch Pro</h1>
+          <p class="tagline" data-i18n="tagline">AI-powered training and certification recommendations</p>
+        </div>
+      </div>
+
+      <div>
+        <button id="language-toggle" class="lang-btn">
+          <span id="lang-text">العربية</span> <i class="fas fa-globe"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="main-content">
+      <section class="chat-section card" aria-label="Chat Assistant">
+        <div class="section-header">
+          <h2><i class="fas fa-comments"></i> <span data-i18n="chatTitle">Chat Assistant</span></h2>
+        </div>
+    
+        <div id="chat-messages" class="chat-messages" aria-live="polite">
+        </div>
+    
+        <div class="chat-input">
+          <input id="user-input" type="text" data-i18n-placeholder="chatPlaceholder" placeholder="Ask about training programs..." autocomplete="off" />
+          <button id="send-button"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="panel-section card merged-section">
+          <h3><i class="fas fa-file-upload"></i> <span data-i18n="uploadTitle">Upload CVs</span></h3>
+          
+          <div id="cv-upload-area" class="file-upload-area" tabindex="0">
+            <i class="fas fa-cloud-upload-alt fa-2x"></i>
+            <p class="muted" data-i18n="dragDrop">Drag & drop CV files here or click to browse</p>
+            <input id="file-input" type="file" multiple accept=".pdf,.docx,.txt" />
+            <div id="upload-status"></div>
+          </div>
+          
+          <div class="section-divider"></div>
+          
+          <h3 class="rules-label" style="justify-content: space-between; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fas fa-gavel"></i> 
+              <span data-i18n="rulesTitle">Business Rules</span>
+              <span class="optional-tag" data-i18n="optional">Optional</span>
+            </div>
+            <button id="maximize-rules-btn" class="icon-btn" type="button" title="Maximize View">
+              <i class="fas fa-expand"></i>
+            </button>
+          </h3>
+
+          <div id="rules-container" class="rules-container">
+            <div id="rules-status"></div>
+          </div>
+          
+          <button id="add-rule-btn" type="button" class="add-rule-btn">
+            <i class="fas fa-plus"></i> <span data-i18n="addRule">Add Rule</span>
+          </button>
+          
+          <button id="generate-recommendations-btn" class="primary action-full" disabled>
+            <i class="fas fa-star"></i> <span data-i18n="generateBtn">Generate Recommendations</span>
+          </button>
+        </section>
+
+        <section class="panel-section card uploaded-cvs-section">
+          <h3 style="justify-content: space-between; width: 100%; display: flex; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fas fa-folder-open"></i> 
+              <span data-i18n="uploadedCvs">Uploaded CVs</span>
+              <span id="uploaded-cv-count" class="optional-tag">0</span>
+            </div>
+            <button id="maximize-uploaded-btn" class="icon-btn" type="button" title="Maximize View">
+              <i class="fas fa-expand"></i>
+            </button>
+          </h3>
+          
+          <div id="submitted-cv-bubbles" class="submitted-cv-bubbles" aria-live="polite"></div>
+        </section>
+      </aside>
+    </div>
+
+    <div id="cvModal" class="cv-modal" role="dialog" aria-modal="true" hidden>
+      <div class="cv-modal-content">
+        <button class="cv-close-btn" id="closeCvModalBtn" aria-label="Close">&times;</button>
+        <h2 data-i18n="reviewTitle">CV Analysis Review</h2>
+        <div class="cv-search-container">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="cvSearchInput" data-i18n-placeholder="searchCv" placeholder="Search CV..." class="cv-search-input" />
+        </div>
+
+        <div id="cvTabsContainer" class="cv-tabs"></div>
+        <div id="cvResultsContainer" class="cv-results"></div>
+        <button id="submitCvReview" class="cv-submit-btn" data-i18n="submit">Submit</button>
+      </div>
+    </div>
+
+    <section class="results-section hidden" id="results-section">
+      <h2><i class="fas fa-star"></i> <span data-i18n="recommendationsTitle">Recommendations</span></h2>
+      <div id="recommendations-container"></div>
+      
+      <button id="download-recommendations-btn" class="download-btn hidden" data-i18n="downloadBtn">
+        <i class="fas fa-download"></i> Download Recommendations (PDF)
+      </button>
+    </section>
+
+    <div id="rulesModal" class="cv-modal" role="dialog" aria-hidden="true" style="display: none;">
+      <div class="cv-modal-content rules-modal-content">
+        <div class="section-header">
+          <h2>
+            <i class="fas fa-gavel"></i> <span data-i18n="rulesTitle">Business Rules</span> 
+            <span class="optional-tag" data-i18n="optional">Optional</span>
+          </h2>
+          <button class="cv-close-btn" id="closeRulesModal">&times;</button>
+        </div>
+        <div id="rules-modal-body" class="rules-modal-body"></div>
+        <div id="rules-modal-add-container" style="margin-top: var(--space-m);"></div>
+        <div id="rules-modal-footer" style="margin-top: var(--space-m);"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <script src="config.js"></script>
+  
+  <script type="module" src="constants.js"></script>
+  <script type="module" src="prompts.js"></script>
+  <script type="module" src="storage-catalog.js"></script>
+  <script type="module" src="ai.js"></script>
+  <script type="module" src="ui.js"></script>
+</body>
+</html>
