@@ -1710,4 +1710,9 @@ body.keep-ltr-layout .bot-message ul {
 .lang-btn:hover {
   background: rgba(255,255,255,0.3);
 }
+/* added for CV Selection*/
+.cv-select-checkbox {
+  margin-right: 8px;
+  cursor: pointer;
+}
 
